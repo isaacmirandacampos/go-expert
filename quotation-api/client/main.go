@@ -12,7 +12,7 @@ import (
 )
 
 type Quotation struct {
-	Dolar string `json:"price"`
+	Dollar string `json:"price"`
 }
 
 func main() {
@@ -70,7 +70,7 @@ func StoreInTxt(q *Quotation) error {
 		return errors.New("error creating file")
 	}
 	defer file.Close()
-	_, err = file.WriteString("Dólar: " + q.Dolar)
+	_, err = file.WriteString("Dólar: " + q.Dollar)
 	if err != nil {
 		return errors.New("error writing file")
 	}
