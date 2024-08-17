@@ -13,20 +13,14 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type MoneyConversion struct {
+type DollarConversion struct {
 	USDBRL struct {
-		Code   string `json:"code"`
-		Codein string `json:"codein"`
-		Name   string `json:"name"`
-		High   string `json:"high"`
-		Low    string `json:"low"`
-		Bid    string `json:"bid"`
-		Ask    string `json:"ask"`
+		Price string `json:"bid"`
 	} `json:"USDBRL"`
 }
 
-type MoneyConversionResponse struct {
-	Bid string `json:"price"`
+type DollarConversionResponse struct {
+	Price string `json:"price"`
 }
 
 func main() {
@@ -40,25 +34,25 @@ func main() {
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var moneyConversion MoneyConversion
-	err := getMoneyConversion(&moneyConversion)
+	var dollarConversion DollarConversion
+	err := getDollarConversion(&dollarConversion)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = saveMoneyConversion(&moneyConversion)
+	err = saveDollarConversion(&dollarConversion)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	moneyConversionResponse := MoneyConversionResponse{
-		Bid: moneyConversion.USDBRL.Bid,
+	dollarConversionResponse := DollarConversionResponse{
+		Price: dollarConversion.USDBRL.Price,
 	}
-	json.NewEncoder(w).Encode(moneyConversionResponse)
+	json.NewEncoder(w).Encode(dollarConversionResponse)
 }
 
-func getMoneyConversion(c *MoneyConversion) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 2000*time.Millisecond)
+func getDollarConversion(c *DollarConversion) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
 	defer cancel()
 	req, err := http.NewRequestWithContext(ctx, "GET", "https://economia.awesomeapi.com.br/json/last/USD-BRL", nil)
 	if err != nil {
@@ -82,7 +76,7 @@ func getMoneyConversion(c *MoneyConversion) error {
 	}
 	select {
 	case <-ctx.Done():
-		log.Println("Request")
+		log.Println("request timeout")
 		return errors.New("request timeout")
 	case <-time.After(200 * time.Millisecond):
 		log.Println("Request between acceptable time")
@@ -90,7 +84,7 @@ func getMoneyConversion(c *MoneyConversion) error {
 	return nil
 }
 
-func saveMoneyConversion(c *MoneyConversion) error {
+func saveDollarConversion(c *DollarConversion) error {
 	db, err := db_connection()
 	if err != nil {
 		return err
@@ -102,26 +96,14 @@ func saveMoneyConversion(c *MoneyConversion) error {
 	if err != nil {
 		return errors.New("error beginning transaction")
 	}
-	stmt, err := db.PrepareContext(ctx, `INSERT INTO money_conversions (
-		code,
-		codein,
-		name,
-		high,
-		low,
-		bid,
-		ask) VALUES (?, ?, ?, ?, ?, ?, ?)`)
+	stmt, err := db.PrepareContext(ctx, `INSERT INTO usd_to_brl_conversions (
+		price) VALUES (?)`)
 	if err != nil {
 		return errors.New("error preparing statement")
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(
-		c.USDBRL.Code,
-		c.USDBRL.Codein,
-		c.USDBRL.Name,
-		c.USDBRL.High,
-		c.USDBRL.Low,
-		c.USDBRL.Bid,
-		c.USDBRL.Ask,
+		c.USDBRL.Price,
 	)
 	if err != nil {
 		return errors.New("error inserting into database")
@@ -133,14 +115,14 @@ func saveMoneyConversion(c *MoneyConversion) error {
 	case <-ctx.Done():
 		log.Println("Insert Timeout")
 		return errors.New("timeout")
-	case <-time.After(200 * time.Millisecond):
+	case <-time.After(10 * time.Millisecond):
 		log.Println("Insert between acceptable time")
 	}
 	return nil
 }
 
 func db_connection() (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", "./money_conversion.db")
+	db, err := sql.Open("sqlite3", "./conversions.db")
 	if err != nil {
 		return nil, errors.New("error opening database")
 	}
@@ -153,15 +135,8 @@ func migration() error {
 		return err
 	}
 	defer db.Close()
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS money_conversions (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		code VARCHAR(10),
-		codein VARCHAR(10),
-		name VARCHAR(255),
-		high REAL,
-		low REAL,
-		bid REAL,
-		ask REAL
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS usd_to_brl_conversions (
+		price REAL
 	)`)
 	if err != nil {
 		return errors.New("error creating table")

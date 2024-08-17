@@ -24,14 +24,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
 	defer cancel()
-	select {
-	case <-ctx.Done():
-		log.Println("Timeout of request")
-		http.Error(w, "timeout", http.StatusRequestTimeout)
-		return
-	case <-time.After(200 * time.Millisecond):
-		log.Println("Response between acceptable time")
-	}
+
 	req, err := http.NewRequestWithContext(ctx, "GET", "http://127.0.0.1:8081/usd-to-brl", nil)
 	if err != nil {
 		http.Error(w, "error creating request", http.StatusInternalServerError)
@@ -41,6 +34,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "error executing request", http.StatusInternalServerError)
 		return
+	}
+	select {
+	case <-ctx.Done():
+		log.Println("Timeout of request")
+		http.Error(w, "timeout", http.StatusRequestTimeout)
+		return
+	case <-time.After(300 * time.Millisecond):
+		log.Println("Response between acceptable time")
 	}
 	defer resp.Body.Close()
 	res, err := io.ReadAll(resp.Body)
@@ -60,6 +61,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	json.NewEncoder(w).Encode(q)
+
 }
 
 func StoreInTxt(q *Quotation) error {
