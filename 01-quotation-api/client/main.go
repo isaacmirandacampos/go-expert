@@ -35,6 +35,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "error executing request", http.StatusInternalServerError)
 		return
 	}
+	defer resp.Body.Close()
 	select {
 	case <-ctx.Done():
 		log.Println("Timeout of request")
@@ -43,7 +44,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	case <-time.After(300 * time.Millisecond):
 		log.Println("Response between acceptable time")
 	}
-	defer resp.Body.Close()
 	res, err := io.ReadAll(resp.Body)
 	if err != nil {
 		http.Error(w, "error reading response", http.StatusInternalServerError)
