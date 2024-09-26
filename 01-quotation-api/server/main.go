@@ -24,11 +24,13 @@ type DollarConversionResponse struct {
 }
 
 func main() {
+	log.Default().Println("Starting...")
 	err := migration()
 	if err != nil {
 		panic(err)
 	}
 	http.HandleFunc("/usd-to-brl", handler)
+	log.Default().Println("Running on port 8080...")
 	http.ListenAndServe(":8080", nil)
 }
 
