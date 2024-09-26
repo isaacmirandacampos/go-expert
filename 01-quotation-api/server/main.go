@@ -29,7 +29,7 @@ func main() {
 		panic(err)
 	}
 	http.HandleFunc("/usd-to-brl", handler)
-	http.ListenAndServe(":8081", nil)
+	http.ListenAndServe(":8080", nil)
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -76,12 +76,11 @@ func getDollarConversion(c *DollarConversion) error {
 	}
 	select {
 	case <-ctx.Done():
-		log.Println("request timeout")
-		return errors.New("request timeout")
+		log.Println("Request Timeout economia.awesomeapi.com.br")
+		return errors.New("Request Timeout economia.awesomeapi.com.br")
 	case <-time.After(200 * time.Millisecond):
-		log.Println("Request between acceptable time")
+		return nil
 	}
-	return nil
 }
 
 func saveDollarConversion(c *DollarConversion) error {
@@ -114,11 +113,10 @@ func saveDollarConversion(c *DollarConversion) error {
 	select {
 	case <-ctx.Done():
 		log.Println("Insert Timeout")
-		return errors.New("timeout")
+		return errors.New("Insert Timeout")
 	case <-time.After(10 * time.Millisecond):
-		log.Println("Insert between acceptable time")
+		return nil
 	}
-	return nil
 }
 
 func db_connection() (*sql.DB, error) {
