@@ -2,7 +2,7 @@ version: '3'
 
 services:
   mysql:
-    image: mysql:5.7
+    image: mysql:9.1.0
     container_name: mysql
     restart: always
     environment:
@@ -11,9 +11,14 @@ services:
       MYSQL_PASSWORD: root
     ports:
       - 3306:3306
-    volumes:
-      - .docker/mysql:/var/lib/mysql
-
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+          cpus: '1.0'
+        reservations:
+          memory: 1024M
+          cpus: '1'
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
@@ -24,3 +29,17 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+  migrate:
+    image: migrate/migrate
+    container_name: migrate
+    depends_on:
+      - mysql
+    entrypoint: >
+      sh -c "
+      while ! nc -z mysql 3306; do sleep 1; done;
+      migrate -path=/migrations -database 'mysql://root:root@tcp(mysql:3306)/orders' up
+      "
+    environment:
+      DATABASE_URL: "mysql://root:root@tcp(mysql:3306)/orders"
+    volumes:
+      - ./migrations:/migrations
