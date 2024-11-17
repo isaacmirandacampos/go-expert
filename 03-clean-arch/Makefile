@@ -1,10 +1,7 @@
 include ./cmd/ordersystem/.env
 
-start:
-	go run cmd/ordersystem/main.go cmd/ordersystem/wire_gen.go
-
 build:
-	go build -o bin/ordersystem cmd/ordersystem/main.go
+	go build -o bin/ordersystem cmd/ordersystem/main.go cmd/ordersystem/wire_gen.go
 
 test:
 	go test ./...
