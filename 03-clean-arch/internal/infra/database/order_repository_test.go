@@ -49,3 +49,34 @@ func (suite *OrderRepositoryTestSuite) TestGivenAnOrder_WhenSave_ThenShouldSaveO
 	suite.Equal(order.Tax, orderResult.Tax)
 	suite.Equal(order.FinalPrice, orderResult.FinalPrice)
 }
+
+func (suite *OrderRepositoryTestSuite) TestGivenAnOrder_WhenGetTotal_ThenShouldReturnTotalOrders() {
+	suite.Db.Exec("INSERT INTO orders (id, price, tax, final_price) VALUES ('123', 10.0, 2.0, 8.0)")
+	suite.Db.Exec("INSERT INTO orders (id, price, tax, final_price) VALUES ('456', 10.0, 2.0, 8.0)")
+	suite.Db.Exec("INSERT INTO orders (id, price, tax, final_price) VALUES ('789', 10.0, 2.0, 8.0)")
+	repo := NewOrderRepository(suite.Db)
+	total, err := repo.GetTotal()
+	suite.NoError(err)
+	suite.Equal(3, total)
+}
+
+func (suite *OrderRepositoryTestSuite) TestGivenAnOrder_WhenListOrders_ThenShouldReturnOrders() {
+	suite.Db.Exec("INSERT INTO orders (id, price, tax, final_price) VALUES ('123', 10.0, 2.0, 8.0)")
+	suite.Db.Exec("INSERT INTO orders (id, price, tax, final_price) VALUES ('456', 10.0, 2.0, 8.0)")
+	suite.Db.Exec("INSERT INTO orders (id, price, tax, final_price) VALUES ('789', 10.0, 2.0, 8.0)")
+	repo := NewOrderRepository(suite.Db)
+	orders := repo.List()
+	suite.Equal(3, len(orders))
+	suite.Equal("123", orders[0].ID)
+	suite.Equal("456", orders[1].ID)
+	suite.Equal("789", orders[2].ID)
+	suite.Equal(10.0, orders[0].Price)
+	suite.Equal(10.0, orders[1].Price)
+	suite.Equal(10.0, orders[2].Price)
+	suite.Equal(2.0, orders[0].Tax)
+	suite.Equal(2.0, orders[1].Tax)
+	suite.Equal(2.0, orders[2].Tax)
+	suite.Equal(8.0, orders[0].FinalPrice)
+	suite.Equal(8.0, orders[1].FinalPrice)
+	suite.Equal(8.0, orders[2].FinalPrice)
+}
