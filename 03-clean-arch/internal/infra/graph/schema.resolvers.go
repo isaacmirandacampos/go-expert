@@ -6,7 +6,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/isaacmirandacampos/go-expert/03-clean-arch/internal/infra/graph/model"
 	"github.com/isaacmirandacampos/go-expert/03-clean-arch/internal/usecase"
@@ -16,8 +15,8 @@ import (
 func (r *mutationResolver) CreateOrder(ctx context.Context, input *model.OrderInput) (*model.Order, error) {
 	dto := usecase.OrderInputDTO{
 		ID:    input.ID,
-		Price: float64(input.Price),
-		Tax:   float64(input.Tax),
+		Price: input.Price,
+		Tax:   input.Tax,
 	}
 	output, err := r.CreateOrderUseCase.Execute(dto)
 	if err != nil {
@@ -25,15 +24,28 @@ func (r *mutationResolver) CreateOrder(ctx context.Context, input *model.OrderIn
 	}
 	return &model.Order{
 		ID:         output.ID,
-		Price:      float64(output.Price),
-		Tax:        float64(output.Tax),
-		FinalPrice: float64(output.FinalPrice),
+		Price:      output.Price,
+		Tax:        output.Tax,
+		FinalPrice: output.FinalPrice,
 	}, nil
 }
 
 // ListOrders is the resolver for the listOrders field.
 func (r *queryResolver) ListOrders(ctx context.Context) ([]*model.Order, error) {
-	panic(fmt.Errorf("not implemented: ListOrders - listOrders"))
+	dto, err := r.ListOrderUseCase.Execute()
+	if err != nil {
+		return nil, err
+	}
+	var orders = make([]*model.Order, len(dto))
+	for index := range dto {
+		orders[index] = &model.Order{
+			ID:         dto[index].ID,
+			Price:      dto[index].Price,
+			Tax:        dto[index].Tax,
+			FinalPrice: dto[index].FinalPrice,
+		}
+	}
+	return orders, nil
 }
 
 // Mutation returns MutationResolver implementation.

@@ -25,7 +25,7 @@ func NewListOrderUseCase(
 	}
 }
 
-func (c *ListOrderUseCase) Execute(input OrderInputDTO) ([]ListOrderOutputDTO, error) {
+func (c *ListOrderUseCase) Execute() ([]ListOrderOutputDTO, error) {
 	orders, err := c.OrderRepository.List()
 	if err != nil {
 		return nil, fmt.Errorf(
