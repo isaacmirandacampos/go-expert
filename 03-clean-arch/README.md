@@ -63,3 +63,15 @@ query ListOrder {
   }
 }
 ```
+
+## Testando o grpc
+
+Instale o evans cli para testar grpc:
+```bash
+go install github.com/ktr0731/evans@latest
+```
+
+Execute apontando para o arquivo .proto
+```bash
+evans --proto internal/infra/grpc/protofiles/order.proto
+```
