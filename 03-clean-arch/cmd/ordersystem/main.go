@@ -24,7 +24,7 @@ import (
 )
 
 func main() {
-	configs, err := configs.LoadConfig(".")
+	configs, err := configs.LoadConfig("./cmd/ordersystem/.env")
 	if err != nil {
 		panic(err)
 	}
