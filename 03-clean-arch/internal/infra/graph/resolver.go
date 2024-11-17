@@ -1,6 +1,6 @@
 package graph
 
-import "github.com/devfullcycle/20-CleanArch/internal/usecase"
+import "github.com/isaacmirandacampos/go-expert/03-clean-arch/internal/usecase"
 
 // This file will not be regenerated automatically.
 //
@@ -8,4 +8,5 @@ import "github.com/devfullcycle/20-CleanArch/internal/usecase"
 
 type Resolver struct {
 	CreateOrderUseCase usecase.CreateOrderUseCase
+	ListOrderUseCase   usecase.ListOrderUseCase
 }

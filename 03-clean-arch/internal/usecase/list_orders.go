@@ -2,7 +2,8 @@ package usecase
 
 import (
 	"fmt"
-	"github.com/devfullcycle/20-CleanArch/internal/entity"
+
+	"github.com/isaacmirandacampos/go-expert/03-clean-arch/internal/entity"
 )
 
 type ListOrderOutputDTO struct {
@@ -12,19 +13,19 @@ type ListOrderOutputDTO struct {
 	FinalPrice float64 `json:"final_price"`
 }
 
-type CreateListOrderUseCase struct {
+type ListOrderUseCase struct {
 	OrderRepository entity.OrderRepositoryInterface
 }
 
 func NewListOrderUseCase(
 	OrderRepository entity.OrderRepositoryInterface,
-) *CreateListOrderUseCase {
-	return &CreateListOrderUseCase{
+) *ListOrderUseCase {
+	return &ListOrderUseCase{
 		OrderRepository: OrderRepository,
 	}
 }
 
-func (c *CreateListOrderUseCase) Execute(input OrderInputDTO) ([]ListOrderOutputDTO, error) {
+func (c *ListOrderUseCase) Execute(input OrderInputDTO) ([]ListOrderOutputDTO, error) {
 	orders, err := c.OrderRepository.List()
 	if err != nil {
 		return nil, fmt.Errorf(
