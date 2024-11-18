@@ -13,19 +13,9 @@ Inclua um README.md com os passos a serem executados no desafio e a porta em que
 
 
 ## Como rodar:
-Levante a infraestrutura executando:
+Basta executar:
 ```bash
 docker compose up -d
-```
-
-entre na pasta:
-```bash
-cd cmd/ordersystem
-```
-
-execute o projeto:
-```bash
-go run main.go wire_gen.go
 ```
 
 ## Testando o web server
