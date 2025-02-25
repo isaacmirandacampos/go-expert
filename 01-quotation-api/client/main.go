@@ -17,7 +17,7 @@ type Quotation struct {
 
 func main() {
 	log.Default().Println("Starting...")
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
 	defer cancel()
 	req, err := http.NewRequestWithContext(ctx, "GET", "http://127.0.0.1:8080/usd-to-brl", nil)
 	if err != nil {
