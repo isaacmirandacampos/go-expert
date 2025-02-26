@@ -1,4 +1,4 @@
-module github.com/isaacmirandacampos/go-expert/04-zipcode-weather
+module github.com/isaacmirandacampos/go-expert/05-zipcode-weather-observability
 
 go 1.23.6
 

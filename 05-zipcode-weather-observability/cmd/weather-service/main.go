@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -12,13 +11,10 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/isaacmirandacampos/go-expert/05-zipcode-weather-observability/pkg"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
-	"go.opentelemetry.io/otel/sdk/resource"
-	"go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
 var tracer = otel.Tracer("weather-service")
@@ -113,42 +109,8 @@ func weatherHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
-func initTracer() func() {
-	otel.SetTextMapPropagator(propagation.TraceContext{})
-
-	otelEndpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
-	if otelEndpoint == "" {
-		otelEndpoint = "otel-collector:4317"
-	}
-
-	exporter, err := otlptracegrpc.New(context.Background(),
-		otlptracegrpc.WithEndpoint(otelEndpoint),
-		otlptracegrpc.WithInsecure(),
-	)
-	if err != nil {
-		log.Fatalf("Failed to initialize OTLP exporter: %v", err)
-	}
-
-	tp := trace.NewTracerProvider(
-		trace.WithBatcher(exporter),
-		trace.WithResource(resource.NewWithAttributes(
-			semconv.SchemaURL,
-			semconv.ServiceNameKey.String("weather-service"),
-		)),
-	)
-	otel.SetTracerProvider(tp)
-
-	otel.SetTextMapPropagator(propagation.TraceContext{})
-
-	return func() {
-		if err := tp.Shutdown(context.Background()); err != nil {
-			log.Printf("Error shutting down tracer provider: %v", err)
-		}
-	}
-}
-
 func main() {
-	shutdown := initTracer()
+	shutdown := pkg.InitTracer("weather-service")
 	defer shutdown()
 
 	r := chi.NewRouter()
