@@ -1,0 +1,43 @@
+version: "3.8"
+services:
+  zipkin:
+    image: openzipkin/zipkin:latest
+    ports:
+      - "9411:9411"
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otel-collector-config.yml"]
+    volumes:
+      - ./docker/otel-collector-config.yml:/etc/otel-collector-config.yml
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "55679:55679"
+    depends_on:
+      - zipkin
+
+  weather-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.weather-service
+    ports:
+      - "8000:8000"
+    environment:
+      - WEATHER_API_KEY=${WEATHER_API_KEY}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
+      - OTEL_SERVICE_NAME=weather-service
+    depends_on:
+      - otel-collector
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "8080:8080"
+    environment:
+      - API_URL=http://weather-service:8000
+      - OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
+      - OTEL_SERVICE_NAME=api-service
+    depends_on:
+      - otel-collector
