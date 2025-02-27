@@ -35,23 +35,19 @@ func TestCreateAuction(t *testing.T) {
 			{"status", auctionEntity.Status},
 		}))
 
-		// Configuração inicial
 		db := mt.DB
 		repo := NewAuctionRepository(db)
 
-		// Define o tempo de expiração como 2 segundos
 		err := os.Setenv("AUCTION_DURATION", "2s")
 		if err != nil {
 			t.Fatalf("Erro ao configurar variável de ambiente: %v", err)
 		}
 
-		// Cria o leilão
 		errInternal := repo.CreateAuction(context.Background(), auctionEntity)
 		if errInternal != nil {
 			t.Fatalf("Erro ao criar leilão: %v", errInternal)
 		}
 
-		// Verifica se o leilão foi inserido no banco de dados
 		var result AuctionEntityMongo
 		err = repo.Collection.FindOne(context.Background(), bson.M{"_id": auctionEntity.Id}).Decode(&result)
 		if err != nil {
@@ -76,7 +72,7 @@ func TestCreateAuction(t *testing.T) {
 			mt.AddMockResponses(mtest.CreateCursorResponse(2, "auctions.update", mtest.FirstBatch, bson.D{
 				{"_id", auctionEntity.Id},
 				{"product_name", auctionEntity.ProductName},
-				{"status", auction_entity.Closed},
+				{"status", auction_entity.Completed},
 			}))
 		} else {
 			mt.AddMockResponses(mtest.CreateCursorResponse(2, "auctions.update", mtest.FirstBatch, bson.D{
@@ -93,13 +89,12 @@ func TestCreateAuction(t *testing.T) {
 			})
 		}
 
-		// Verifica se o leilão foi fechado automaticamente
 		err = repo.Collection.FindOne(context.Background(), bson.M{"_id": auctionEntity.Id}).Decode(&result)
 		if err != nil {
 			t.Fatalf("Erro ao buscar leilão: %v", err)
 		}
 
-		assert.Equal(t, auction_entity.Closed, result.Status)
+		assert.Equal(t, auction_entity.Completed, result.Status)
 
 	})
 }

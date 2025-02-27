@@ -72,7 +72,7 @@ func (ar *AuctionRepository) startAuctionExpiryCheck(ctx context.Context, auctio
 		mutex.Lock()
 		defer mutex.Unlock()
 
-		_, err := ar.Collection.UpdateOne(ctx, bson.M{"_id": auctionID}, bson.M{"$set": bson.M{"status": auction_entity.Closed, "ends_at": time.Now().Unix()}})
+		_, err := ar.Collection.UpdateOne(ctx, bson.M{"_id": auctionID}, bson.M{"$set": bson.M{"status": auction_entity.Completed, "ends_at": time.Now().Unix()}})
 		if err != nil {
 			log.Printf("Erro ao fechar o leilão %s: %v", auctionID, err)
 		}

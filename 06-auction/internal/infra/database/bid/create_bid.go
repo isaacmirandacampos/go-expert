@@ -71,7 +71,7 @@ func (bd *BidRepository) CreateBid(
 
 			if okEndTime && okStatus {
 				now := time.Now()
-				if auctionStatus == auction_entity.Completed || auctionStatus == auction_entity.Closed || now.After(auctionEndTime) {
+				if auctionStatus == auction_entity.Completed || now.After(auctionEndTime) {
 					return
 				}
 
@@ -88,7 +88,7 @@ func (bd *BidRepository) CreateBid(
 				logger.Error("Error trying to find auction by id", err)
 				return
 			}
-			if auctionEntity.Status == auction_entity.Completed || auctionEntity.Status == auction_entity.Closed {
+			if auctionEntity.Status == auction_entity.Completed {
 				return
 			}
 
