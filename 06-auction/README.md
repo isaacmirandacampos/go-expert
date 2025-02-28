@@ -10,7 +10,12 @@ Conforme a proposta que foi levantada na atividade, segue as edições realizada
 
 ## Execução
 
-Para executar o projeto, basta rodar o comando abaixo:
+Para executar o projeto, crie .env dentro de cmd/auction, use .env.example como exemplo ou use o código abaixo:
+```bash
+mv cmd/auction/.env.example cmd/auction/.env
+```
+
+Após isso, basta rodar o comando abaixo
 
 ```bash
 docker-compose up
